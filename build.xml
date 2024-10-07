@@ -1,0 +1,40 @@
+<project name="javaproj" default="target" basedir=".">
+ 
+  <!-- set global properties for this build -->
+  <property name="src" location="src"/>
+  <property name="build" location="build"/>
+  <property name="target" location="target"/>
+ 
+  <target name="init">
+    <!-- create the time stamp -->
+    <tstamp/>
+    <!-- create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+ 
+  <target name="compile" depends="init"
+        description="compile the source">
+    <!-- compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"/>
+  </target>
+ 
+  <target name="target" depends="compile"
+        description="generate the distribution">
+    <!-- create the distribution directory -->
+    <mkdir dir="${target}"/>
+ 
+    <!-- put everything in ${build} into the myproject-${dstamp}.jar file -->
+    <jar jarfile="${target}/javaproj.jar" basedir="${build}">
+            <manifest>
+                <attribute name="main-class" value="main"/>
+            </manifest>   
+    </jar>
+  </target>
+ 
+  <target name="clean"
+        description="clean up">
+    <!-- delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${target}"/>
+  </target>
+</project>
