@@ -31,6 +31,7 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             jdt-language-server
+            java-language-server
           ] ++ nativeBuildInputs;
         };
         # Mostly copied from https://nixos.org/manual/nixpkgs/stable/#sec-language-java
