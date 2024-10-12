@@ -4,9 +4,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    build-gradle-application.url = "github:raphiz/buildGradleApplication";
+    gradle2nix.url = "github:tadfisher/gradle2nix";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
+  outputs = { self, nixpkgs, flake-utils, build-gradle-application, ... }:
     let
       pname = "javaproj";
       version = "0.0.1";
@@ -17,14 +19,17 @@
     flake-utils.lib.eachDefaultSystem (
       system:
       let 
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ build-gradle-application.overlays.default ];
+        };
         stdenv = pkgs.stdenv;
         lib = pkgs.lib;
         jdk = pkgs.jdk22;
+        buildGradleApplication = pkgs.buildGradleApplication;
         nativeBuildInputs = with pkgs; [
           jdk
-          ant
-          makeWrapper
+          gradle_8
         ];
       in
       {
@@ -32,29 +37,19 @@
           buildInputs = with pkgs; [
             jdt-language-server
             java-language-server
+            gradle-completion
+            updateVerificationMetadata
           ] ++ nativeBuildInputs;
         };
         # Mostly copied from https://nixos.org/manual/nixpkgs/stable/#sec-language-java
         packages = {
             default = self.packages.${sys}.${pname};
-            ${pname} = stdenv.mkDerivation {
+            ${pname} = buildGradleApplication {
               inherit pname;
               inherit version;
               src = ./.;
               inherit nativeBuildInputs;
-            
-              buildPhase = ''
-                ant # build the project using ant
-              '';
-
-              installPhase = ''
-                # copy generated jar file(s) to an appropriate location in $out
-                mkdir -p $out/bin $out/share/${pname}
-                install -Dm644 target/${pname}.jar $out/share/${pname}
-
-                 makeWrapper ${jdk}/bin/java $out/bin/${pname}  \
-                  --add-flags "-jar $out/share/${pname}/${pname}.jar"
-              '';
+              meta.license = lib.licenses.mit;
         };
       };
     }
