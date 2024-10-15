@@ -7,6 +7,11 @@
         path = ./java;
         description= "Java package with devshell template";
       };
+      #  nix flake new -t git+https://csgitlab.reading.ac.uk/philipwilk/templates?ref=main#cpp cppProj
+      cpp = {
+        path = ./cpp;
+        description = "C++ package with devshell template";
+      };
     };
 
     defaultTemplate = self.templates.java;
