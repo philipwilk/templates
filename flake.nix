@@ -12,6 +12,11 @@
         path = ./cpp;
         description = "C++ package with devshell template";
       };
+
+      matlab = {
+        path = ./matlab;
+        description = "Matlab dev shell";
+      };
     };
 
     defaultTemplate = self.templates.java;

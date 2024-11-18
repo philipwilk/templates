@@ -1,5 +1,5 @@
 {
-  description = "A very basic flake";
+  description = "Cpp package+devshell example";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
