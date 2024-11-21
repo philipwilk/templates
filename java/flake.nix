@@ -5,7 +5,6 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     build-gradle-application.url = "github:raphiz/buildGradleApplication";
-    gradle2nix.url = "github:tadfisher/gradle2nix";
   };
 
   outputs = { self, nixpkgs, flake-utils, build-gradle-application, ... }:
@@ -25,7 +24,7 @@
         };
         stdenv = pkgs.stdenv;
         lib = pkgs.lib;
-        jdk = pkgs.jdk22;
+        jdk = pkgs.jdk23;
         buildGradleApplication = pkgs.buildGradleApplication;
         nativeBuildInputs = with pkgs; [
           jdk
