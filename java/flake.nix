@@ -12,8 +12,7 @@
       pname = "javaproj";
       version = "0.0.1";
       sys = "x86_64-linux";
-      org = "your.org.com";
-      # java --enable-preview --source 22 main.java
+      # java --enable-preview --source 23 main.java
     in
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -22,14 +21,8 @@
           inherit system;
           overlays = [ build-gradle-application.overlays.default ];
         };
-        stdenv = pkgs.stdenv;
-        lib = pkgs.lib;
-        jdk = pkgs.jdk23;
-        buildGradleApplication = pkgs.buildGradleApplication;
-        nativeBuildInputs = with pkgs; [
-          jdk
-          gradle_8
-        ];
+        jdk = pkgs.jdk23.override { enableJavaFX = true; };
+        gradle = pkgs.callPackage pkgs.gradle-packages.gradle_8 { java = jdk; };
       in
       {
         devShells.default = pkgs.mkShell {
@@ -38,17 +31,19 @@
             java-language-server
             gradle-completion
             updateVerificationMetadata
-          ] ++ nativeBuildInputs;
+            jdk
+            gradle
+          ];
         };
         # Mostly copied from https://nixos.org/manual/nixpkgs/stable/#sec-language-java
         packages = {
             default = self.packages.${sys}.${pname};
-            ${pname} = buildGradleApplication {
-              inherit pname;
-              inherit version;
+            ${pname} = pkgs.buildGradleApplication {
+              inherit pname version jdk gradle;
               src = ./.;
-              inherit nativeBuildInputs;
-              meta.license = lib.licenses.mit;
+              meta.license = pkgs.lib.licenses.mit;
+              buildTask = "installDist";
+              installLocation = "app/build/install/*/";
         };
       };
     }
