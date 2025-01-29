@@ -1,2 +1,4 @@
 .direnv
 result
+flake.lock
+*/flake.lock
