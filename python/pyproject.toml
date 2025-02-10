@@ -1,0 +1,22 @@
+# curtsey of https://github.com/nix-community/templates/blob/main/python/pyproject.toml
+[build-system]
+requires = [
+  "setuptools",
+  "setuptools-scm"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project]
+name = "pythonProject"
+version = "0.0.0"
+authors = [
+    # {name = "You", email = "you@you.com"},
+]
+description = "idk"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+]
