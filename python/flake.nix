@@ -24,13 +24,12 @@
       nativeBuildInputs = with pyPackages; [
         pkgs.python313
         setuptools
-        setuptools-scm
       ];
       buildInputs = with pkgs; [];
     in {
       devShells.default  = (pkgs.python313.buildEnv.override {
         extraLibs = with pyPackages; [
-
+          python-lsp-server
         ];
       }).env;
 
@@ -41,16 +40,16 @@
           pname = pyproject.project.name;
           inherit (pyproject.project) version;
 
-          root = "$REPO_ROOT/src";
-
           pyproject = true;
-          build-system = with pyPackages; [setuptools setuptools-scm];
+          build-system = with pyPackages; [
+            setuptools
+          ];
           doCheck = false;
           src = ./.;
 
           dependencies = with pyPackages; [
           ];
-          
+
           meta = {
             license = lib.licenses.mit;
           };
