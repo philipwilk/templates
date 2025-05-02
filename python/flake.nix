@@ -46,7 +46,10 @@
           ];
           # declare your env vars here
           # export x=y
-          shellHook = "";
+          shellHook = ''
+            # must be set if you are using qt
+            # export QT_QPA_PLATFORM_PLUGIN_PATH="${pkgs.qt5.qtbase.bin}/lib/qt-${pkgs.qt5.qtbase.version}/plugins
+          '';
         };
 
         packages = {
@@ -64,6 +67,12 @@
             src = ./.;
 
             inherit dependencies;
+            # for qt gui applications
+            # buildInputs = with pkgs; [ qt5.qtbase ];
+            # nativeBuildInputs = with pkgs; [
+            #   qt5.wrapQtAppsHook
+            # ];
+            dontWrapQtApps = true;
             nativeCheckInputs = [
               pyPackages.pytestCheckHook
             ];
