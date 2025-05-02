@@ -9,6 +9,15 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+# Include static files if necessary
+# [tool.setuptools.package-data]
+# python_qr_project = ['static/*']
+
+# use the newer importlib import mode for pytest, which resolves dependency issues
+#  (not being able to find yourself)
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+
 [project]
 name = "pythonProject"
 version = "0.0.0"
@@ -21,5 +30,17 @@ requires-python = ">=3.13"
 dependencies = [
 ]
 
+[project.optional-dependencies]
+testing = [
+  "pytest",
+  "ruff"
+]
+dev = [
+  "python-lsp-server",
+  "python_qr_project[testing]"
+]
+
 [project.scripts]
+# entrypoint in a python file - here it is in hello.py's main function
+# this gives the python package an executable 'binary'
 pythonProject = "__hello__:main"
