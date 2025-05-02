@@ -1,4 +1,3 @@
-
 {
   description = "Python package+devshell example";
 
@@ -7,54 +6,73 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
-  let
-    sys = "x86_64-linux";
-  in
-  flake-utils.lib.eachDefaultSystem (
-    system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      ...
+    }:
     let
-      pkgs = import nixpkgs {
-        inherit system;
-      };
-      pyproject = pkgs.lib.importTOML ./pyproject.toml;
-      pyPackages = pkgs.python313Packages;
-      stdenv = pkgs.stdenv;
-      lib = pkgs.lib;
-      nativeBuildInputs = with pyPackages; [
-        pkgs.python313
-        setuptools
-      ];
-      buildInputs = with pkgs; [];
-    in {
-      devShells.default  = (pkgs.python313.buildEnv.override {
-        extraLibs = with pyPackages; [
-          python-lsp-server
+      sys = "x86_64-linux";
+    in
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+        };
+        pyproject = pkgs.lib.importTOML ./pyproject.toml;
+        projectPython = pkgs.python313;
+        pyPackages = pkgs.python313Packages;
+        lib = pkgs.lib;
+        dependencies = with pyPackages; [
         ];
-      }).env;
-
-      packages = {
-        default = self.packages.${sys}.${pyproject.project.name};
-        ${pyproject.project.name} = pyPackages.buildPythonApplication {
-          inherit nativeBuildInputs buildInputs;
-          pname = pyproject.project.name;
-          inherit (pyproject.project) version;
-
-          pyproject = true;
-          build-system = with pyPackages; [
-            setuptools
+      in
+      {
+        devShells.default = pkgs.mkShell {
+          buildInputs = with pkgs; [
+            (projectPython.withPackages (
+              packages:
+              with packages;
+              [
+                python-lsp-server
+                python-lsp-ruff
+                pytest
+              ]
+              ++ dependencies
+            ))
+            ruff
           ];
-          doCheck = false;
-          src = ./.;
+          # declare your env vars here
+          # export x=y
+          shellHook = "";
+        };
 
-          dependencies = with pyPackages; [
-          ];
+        packages = {
+          default = self.packages.${sys}.${pyproject.project.name};
+          ${pyproject.project.name} = pyPackages.buildPythonApplication {
+            pname = pyproject.project.name;
+            inherit (pyproject.project) version;
 
-          meta = {
-            license = lib.licenses.mit;
+            pyproject = true;
+            build-system = with pyPackages; [
+              setuptools
+            ];
+            # remove once tests have been added
+            doCheck = false;
+            src = ./.;
+
+            inherit dependencies;
+            nativeCheckInputs = [
+              pyPackages.pytestCheckHook
+            ];
+
+            meta = {
+              license = lib.licenses.mit;
+            };
           };
         };
-      };
-    }
-  );
+      }
+    );
 }
