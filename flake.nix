@@ -9,6 +9,11 @@
           path = ./java;
           description = "Java package with devshell template";
         };
+        # nix flake new -t git+https://git.fogbox.uk/templates?ref=main#javafx javaProj
+        javafx = {
+          path = ./javafx;
+          description = "Java package with javafx with devshell template";
+        };
         # nix flake new -t git+https://git.fogbox.uk/templates?ref=main#cpp cppProj
         cpp = {
           path = ./cpp;
