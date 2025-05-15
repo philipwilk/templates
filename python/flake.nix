@@ -3,85 +3,87 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    make-shell.url = "github:nicknovitski/make-shell";
   };
-
   outputs =
-    {
-      self,
-      nixpkgs,
-      flake-utils,
-      ...
-    }:
-    let
-      sys = "x86_64-linux";
-    in
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
-        pyproject = pkgs.lib.importTOML ./pyproject.toml;
-        projectPython = pkgs.python313;
-        pyPackages = pkgs.python313Packages;
-        lib = pkgs.lib;
-        dependencies = with pyPackages; [
-        ];
-      in
+    { self, ... }@inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (
+      top@{
+        nixpkgs,
+        withSystem,
+        ...
+      }:
       {
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            (projectPython.withPackages (
-              packages:
-              with packages;
-              [
-                python-lsp-server
-                python-lsp-ruff
-                pytest
-              ]
-              ++ dependencies
-            ))
-            ruff
-          ];
-          # declare your env vars here
-          # export x=y
-          shellHook = ''
-            # must be set if you are using qt
-            # export QT_QPA_PLATFORM_PLUGIN_PATH="${pkgs.qt5.qtbase.bin}/lib/qt-${pkgs.qt5.qtbase.version}/plugins
-          '';
-        };
+        imports = [
+          inputs.make-shell.flakeModules.default
+        ];
 
-        packages = {
-          default = self.packages.${sys}.${pyproject.project.name};
-          ${pyproject.project.name} = pyPackages.buildPythonApplication {
-            pname = pyproject.project.name;
-            inherit (pyproject.project) version;
+        systems = [
+          "x86_64-linux"
+        ];
 
-            pyproject = true;
-            build-system = with pyPackages; [
-              setuptools
+        perSystem =
+          {
+            config,
+            pkgs,
+            lib,
+            system,
+            self',
+            ...
+          }:
+          let
+            pyProject = pkgs.lib.importTOML ./pyproject.toml;
+            projectPython = pkgs.python313;
+            pyPackages = pkgs.python313Packages;
+            dependencies = with pyPackages; [
+              # put pyproject.toml dependencies here
             ];
-            # remove once tests have been added
-            doCheck = false;
-            src = ./.;
+          in
+          {
+            make-shells.default = {
+              packages = with pkgs; [
+                (projectPython.withPackages (
+                  packages:
+                  with packages;
+                  [
+                    # put pyproject.toml test/dev dependencies here
+                    python-lsp-server
+                    python-lsp-ruff
+                    pytest
+                  ]
+                  ++ dependencies
+                ))
+                ruff
+              ];
+              env = {
+                # environment variables for development shell
+              };
+            };
+            packages = {
+              default = self'.packages.${pyProject.project.name};
+              ${pyProject.project.name} = pyPackages.buildPythonApplication {
+                pname = pyProject.project.name;
+                inherit (pyProject.project) version;
 
-            inherit dependencies;
-            # for qt gui applications
-            # buildInputs = with pkgs; [ qt5.qtbase ];
-            # nativeBuildInputs = with pkgs; [
-            #   qt5.wrapQtAppsHook
-            # ];
-            dontWrapQtApps = true;
-            nativeCheckInputs = [
-              pyPackages.pytestCheckHook
-            ];
+                pyproject = true;
+                build-system = with pyPackages; [
+                  setuptools
+                ];
+                src = ./.;
 
-            meta = {
-              license = lib.licenses.mit;
+                inherit dependencies;
+
+                nativeCheckInputs = [
+                  pyPackages.pytestCheckHook
+                ];
+
+                meta = {
+                  license = lib.licenses.mit;
+                };
+              };
             };
           };
-        };
       }
     );
 }

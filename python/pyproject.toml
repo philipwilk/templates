@@ -11,7 +11,7 @@ where = ["src"]
 
 # Include static files if necessary
 # [tool.setuptools.package-data]
-# python_qr_project = ['static/*']
+# pythonProject= ['static/*']
 
 # use the newer importlib import mode for pytest, which resolves dependency issues
 #  (not being able to find yourself)
@@ -37,10 +37,10 @@ testing = [
 ]
 dev = [
   "python-lsp-server",
-  "python_qr_project[testing]"
+  "pythonProject[testing]"
 ]
 
 [project.scripts]
-# entrypoint in a python file - here it is in hello.py's main function
+# entrypoint in a python file - here it is the pythonProject module, in app.py, in main
 # this gives the python package an executable 'binary'
-pythonProject = "__hello__:main"
+pythonProject = "pythonProject.app:main"
