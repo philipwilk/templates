@@ -10,7 +10,7 @@ javafx {
 }
 
 application {
-  mainClass = "javaProj.Main"
+  mainClass = "javaProject.Main"
 }
 
 tasks.compileJava {
