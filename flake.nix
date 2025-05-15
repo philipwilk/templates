@@ -4,6 +4,11 @@
     { self }:
     {
       templates = {
+        # nix flake new -t git+https://git.fogbox.uk/templates?ref=main#template newTemplate
+        template = {
+          path = ./template;
+          description = "Template with package and devshell template";
+        };
         # nix flake new -t git+https://git.fogbox.uk/templates?ref=main#java javaProj
         java = {
           path = ./java;
