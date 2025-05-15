@@ -3,64 +3,94 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    make-shell.url = "github:nicknovitski/make-shell";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
-  let
-    pname = "cppProj";
-    version = "0.0.1";
-    sys = "x86_64-linux";
-  in
-  flake-utils.lib.eachDefaultSystem (
-    system:
-    let
-      pkgs = import nixpkgs {
-        inherit system;
-      };
-      stdenv = pkgs.stdenv;
-      lib = pkgs.lib;
-      nativeBuildInputs = with pkgs; [
-        gnumake
-        sccache
-        gcc.cc.libgcc
-        makeWrapper
-      ];
-    in {
-      devShells.default  =pkgs.mkShell {
-        buildInputs = with pkgs; [
-          gdb
-          valgrind
-          tree-sitter-grammars.tree-sitter-c
-          tree-sitter-grammars.tree-sitter-cmake
-          tree-sitter-grammars.tree-sitter-cpp
-          clang-tools
-        ] ++ nativeBuildInputs;
-      };
+  outputs =
+    { self, ... }@inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (
+      top@{
+        nixpkgs,
+        withSystem,
+        ...
+      }:
+      {
+        imports = [
+          inputs.make-shell.flakeModules.default
+        ];
 
-      packages = {
-        default = self.packages.${sys}.${pname};
-        ${pname} = stdenv.mkDerivation {
-          inherit pname;
-          inherit version;
-          src = ./.;
-          inherit nativeBuildInputs;
-          meta.license = lib.licenses.mit;
+        systems = [
+          "x86_64-linux"
+        ];
 
-          preBuildPhase = ''
-            mkdir ./build
-          '';
+        perSystem =
+          {
+            config,
+            pkgs,
+            lib,
+            system,
+            self',
+            ...
+          }:
+          let
+            pname = "cppProject";
+            nativeBuildInputs = with pkgs; [
+              # put build dependencies here
+              gnumake
+              sccache
+              gcc.cc.libgcc
+              makeWrapper
+            ];
+            buildInputs = with pkgs; [
+              # put runtime dependencies here
+            ];
+          in
+          {
+            make-shells.default = {
+              packages =
+                with pkgs;
+                [
+                  gdb
+                  valgrind
+                  tree-sitter-grammars.tree-sitter-c
+                  tree-sitter-grammars.tree-sitter-cmake
+                  tree-sitter-grammars.tree-sitter-cpp
+                  clang-tools
+                ]
+                ++ nativeBuildInputs;
+              env = {
+                # environment variables for development shell
+              };
+            };
+            packages = {
+              default = self'.packages.${pname};
+              ${pname} = pkgs.stdenv.mkDerivation {
+                inherit pname;
+                version = "0-unstable";
+                src = ./.;
 
-          makeFlags = [
-            "CC=g++"
-          ];
+                inherit nativeBuildInputs buildInputs;
 
-          installPhase = ''
-            mkdir -p $out/bin
-            cp build/main $out/bin/${pname}
-          '';
-        };
-      };
-    }
-  );
+                preBuildPhase = ''
+                  mkdir ./build
+                '';
+
+                makeFlags = [
+                  "CC=g++"
+                ];
+
+                installPhase = ''
+                  mkdir -p $out/bin
+                  cp build/main $out/bin/${pname}
+                '';
+
+                meta = {
+                  license = lib.licenses.mit;
+                };
+              };
+            };
+          };
+      }
+    );
 }
