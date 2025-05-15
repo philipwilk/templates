@@ -1,27 +1,47 @@
-
 {
   description = "Matlab devshell.";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    make-shell.url = "github:nicknovitski/make-shell";
   };
+  outputs =
+    { self, ... }@inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (
+      top@{
+        nixpkgs,
+        withSystem,
+        ...
+      }:
+      {
+        imports = [
+          inputs.make-shell.flakeModules.default
+        ];
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
-  flake-utils.lib.eachDefaultSystem (
-    system:
-    let
-      pkgs = import nixpkgs { inherit system; };
-      stdenv = pkgs.stdenv;
-      lib = pkgs.lib;
-      nativeBuildInputs = with pkgs; [
-      ];
-    in {
-      devShells.default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          matlab-language-server
-        ] ++ nativeBuildInputs;
-      };
-    }
-  );
+        systems = [
+          "x86_64-linux"
+        ];
+
+        perSystem =
+          {
+            config,
+            pkgs,
+            lib,
+            system,
+            self',
+            ...
+          }:
+          {
+            make-shells.default = {
+              packages = with pkgs; [
+                matlab-language-server
+              ];
+              env = {
+                # environment variables for development shell
+              };
+            };
+          };
+      }
+    );
 }
