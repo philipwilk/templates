@@ -34,6 +34,11 @@
           path = ./python;
           description = "Python package with devshell template";
         };
+        # nix flake new -t git+https://git.fogbox.uk/templates?ref=main#python-flask pythonProj
+        python-flask = {
+          path = ./python-flask;
+          description = "Python package with flask with devshell template";
+        };
       };
 
       defaultTemplate = self.templates.java;
