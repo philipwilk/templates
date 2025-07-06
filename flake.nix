@@ -44,6 +44,11 @@
           path = ./python-flask;
           description = "Python package with flask with devshell template";
         };
+        # nix flake new -t git+https://git.fogbox.uk/templates?ref=main#rust rustProj
+        rust = {
+          path = ./rust;
+          description = "Rust package with devshell template";
+        };
       };
 
       defaultTemplate = self.templates.java;
