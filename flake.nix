@@ -47,7 +47,7 @@
         # nix flake new -t git+https://git.fogbox.uk/templates?ref=main#rust rustProj
         rust = {
           path = ./rust;
-          description = "Rust package with devshell template"
+          description = "Rust package with devshell template";
         };
       };
 
