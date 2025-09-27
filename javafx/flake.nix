@@ -41,7 +41,7 @@
             pname = "javaProject";
             version = "0-unstable";
             jdk = pkgs.jdk23.override { enableJavaFX = true; };
-            gradle = pkgs.callPackage pkgs.gradle-packages.gradle_8 { java = jdk; };
+            gradle = pkgs.gradle_9.override { java = jdk; };
             # Java gradle dependencies should be updated in app/build.gradle.kts
             # then, run update-verification-metadata
             #

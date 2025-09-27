@@ -40,8 +40,8 @@
           let
             pname = "javaproject";
             version = "0-unstable";
-            jdk = pkgs.jdk23;
-            gradle = pkgs.callPackage pkgs.gradle-packages.gradle_8 { java = jdk; };
+            jdk = pkgs.jdk24;
+            gradle = pkgs.gradle_9.override { java = jdk; };
           in
           {
             # Apply build-gradle-application overlay
