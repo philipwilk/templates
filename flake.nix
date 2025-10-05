@@ -12,6 +12,7 @@
     python.url = "path:./python";
     python-flask.url = "path:./python-flask";
     rust.url = "path:./rust";
+    haskell.url = "path:./haskell";
   };
 
   outputs =
@@ -79,6 +80,11 @@
               rust = {
                 path = ./rust;
                 description = "Rust package with devshell template";
+              };
+              # nix flake new -t git+https://git.fogbox.uk/templates?ref=main#haskell haskellApp
+              haskell = {
+                path = ./haskell;
+                description = "Haskell package with devshell template";
               };
             };
           };
